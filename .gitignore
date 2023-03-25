@@ -1,0 +1,6 @@
+!.gitkeep
+
+docker/meilisearch
+docker/strapiDB
+
+.env

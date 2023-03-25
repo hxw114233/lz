@@ -1,0 +1,76 @@
+version: '3'
+
+services:
+  strapi:
+    container_name: strapi
+    build: ${PWD}/strapi
+    image: strapi:latest
+    restart: unless-stopped
+    env_file: ${PWD}/.env
+    environment:
+      DATABASE_CLIENT: ${DATABASE_CLIENT}
+      DATABASE_HOST: strapiDB
+      DATABASE_PORT: ${DATABASE_PORT}
+      DATABASE_NAME: ${DATABASE_NAME}
+      DATABASE_USERNAME: ${DATABASE_USERNAME}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET}
+      APP_KEYS: ${APP_KEYS}
+      NODE_ENV: ${NODE_ENV}
+      MEILI_HOST: http://meilisearch:7700
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY}
+    volumes:
+      - ${PWD}/strapi/config:/opt/app/config
+      - ${PWD}/strapi/src:/opt/app/src
+      - ${PWD}/strapi/package.json:/opt/package.json
+      - ${PWD}/strapi/yarn.lock:/opt/yarn.lock
+      - ${PWD}/strapi/.env:/opt/app/.env
+      - ${PWD}/strapi/public/uploads:/opt/app/public/uploads
+    ports:
+      - '1337:1337'
+    networks:
+      - strapi
+    depends_on:
+      - strapiDB
+
+  strapiDB:
+    container_name: strapiDB
+    platform: linux/amd64 #for platform error on Apple M1 chips
+    restart: unless-stopped
+    env_file: ${PWD}/.env
+    image: mysql:5.7
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_USER: ${DATABASE_USERNAME}
+      MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD}
+      MYSQL_PASSWORD: ${DATABASE_PASSWORD}
+      MYSQL_DATABASE: ${DATABASE_NAME}
+    volumes:
+      - ${PWD}/docker/strapiDB/data:/var/lib/mysql # if you want to use a bind folder
+    ports:
+      - '3306:3306'
+    networks:
+      - strapi
+
+  meilisearch:
+    container_name: meilisearch
+    restart: unless-stopped
+    env_file: ${PWD}/.env
+    image: getmeili/meilisearch:latest
+    environment:
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY} 
+    volumes:
+      - ${PWD}/docker/meilisearch/meili_data:/meili_data
+    ports:
+      - 7700:7700
+    networks:
+      - strapi
+
+volumes:
+  strapi-data:
+
+networks:
+  strapi:
+    name: Strapi
+    driver: bridge
