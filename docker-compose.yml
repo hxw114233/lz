@@ -48,6 +48,7 @@ services:
       MYSQL_DATABASE: ${DATABASE_NAME}
     volumes:
       - ${PWD}/docker/strapiDB/data:/var/lib/mysql # if you want to use a bind folder
+      - ${PWD}/docker/my.cnf:/etc/mysql/conf.d/my.cnf
     ports:
       - '3306:3306'
     networks:
