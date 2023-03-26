@@ -1,0 +1,11 @@
+{
+	"strapi_host": "",
+	"strapi_key": {
+		"ident": "",
+		"password": ""
+	},
+	"meilisearch_host": "",
+	"meilisearch_key": {
+		"token": ""
+	}
+}
